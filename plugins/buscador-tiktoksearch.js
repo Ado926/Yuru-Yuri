@@ -15,16 +15,16 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       return conn.reply(m.chat, "No se encontraron videos.", m);
     }
 
-    for (let i = 0; i < videos.length; i++) {
-      let video = videos[i];
-      let caption = i === 0
-        ? `「 𝖳𝗂𝗄𝗍𝗈𝗄 - 𝖲𝖾𝖺𝗋𝖼𝗁 」\n\n➮ ✐ 𝗧𝗶𝘁𝘂𝗹𝗼 » ${video.title}\n➮ ☄︎ 𝗕𝘂𝘀𝗾𝘂𝗲𝗱𝗮 » ${text}`
-        : `❀ *Titulo* » ${video.title}\n☁︎ *Process* » ${((new Date() - old) * 1)} ms`;
+    let caption = `「 𝖳𝗂𝗄𝗍𝗈𝗄 - 𝖲𝖾𝖺𝗋𝖼𝗁 」\n\n`
+                + `☁︎ *Busqueda:* ${text}\n`
+                + `☄︎ *Tiempo:* ${((new Date() - old))} ms\n\n`;
 
-      await conn.sendFile(m.chat, video.no_wm, 'tiktok.mp4', caption, m);
-    }
+    caption += videos.map((v, i) => `🎬 *${i + 1}.* ${v.title}\n🔗 ${v.no_wm}`).join('\n\n');
 
+    // Envía solo el primer video como vista previa con la lista completa
+    await conn.sendFile(m.chat, videos[0].no_wm, 'video.mp4', caption, m);
     m.react('✅');
+    
   } catch (e) {
     return conn.reply(m.chat, `Ocurrió un problema al obtener los videos:\n\n` + e, m);
   }
