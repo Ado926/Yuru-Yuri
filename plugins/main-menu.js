@@ -20,7 +20,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   // Detectar si es el bot principal o un sub bot
   let mainBotNumber = '50493059810@s.whatsapp.net'; // <-- Número del bot principal
   let esPrincipal = conn.user.jid === mainBotNumber;
-  let estadoBot = esPrincipal ? '\`✧ Bot:\` *Principal*' : '\`✧ Bot:\` *Sub Bot*';
+  let estadoBot = esPrincipal ? '\`☁︎ Bot:\` *Principal 🅥*' : '\`✐ Bot:\` *Sub Bot 🅑*';
 
   // Obtener el menú agrupado por tags
   const groups = {};
@@ -36,7 +36,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   let cap = `${estadoBot}\n\n❀ *Tiempo activa:* ${rTime(uptime)}\n\n⊂(◉‿◉)つ ¡Hola ${nombre}!\n> Aquí tienes el menú:\n\n`;
 
   for (let tag in groups) {
-    cap += `✧ *${tag.toUpperCase()}*\n`;
+    cap += `✦➮❒ *${tag.toUpperCase()}*\n`;
     for (let cmds of groups[tag]) {
       for (let cmd of cmds) {
         cap += `• ${usedPrefix}${cmd}\n`;
