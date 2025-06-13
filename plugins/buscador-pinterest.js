@@ -9,10 +9,10 @@ let json = api.data
 let data = json.data[Math.floor(Math.random() * json.data.length)]
 
 let { pin, created_at, images_url, grid_title } = data
-let HS = `*「✦」 ${grid_title}*
+let HS = `*✦ ${grid_title}*
 
-> *✦ creador: » ${created_at}*
-> *🜸 link: » ${pin}*`
+> *✦ Creador: » ${created_at}*
+> *🜸 Link: » ${pin}*`
 await conn.sendMessage(m.chat, { image: { url: images_url }, caption: HS }, { quoted: m })
 //await conn.sendMessage(m.chat, { image: images_url, caption: HS, footer: '', buttons: [ { buttonId: `.pinterest ${text}`, buttonText: { displayText: 'Siguiente' } }, ], viewOnce: true, headerType: 4 }, { quoted: m })
 
