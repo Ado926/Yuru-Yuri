@@ -53,8 +53,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   ctx.fillStyle = 'rgba(0,0,0,0.5)'
   ctx.fillRect(0, 0, width, height)
 
-  // Avatar
-  const avatarSize = 100
+  // Avatar (más grande)
+  const avatarSize = 160
   ctx.save()
   ctx.beginPath()
   ctx.arc(100 + avatarSize / 2, height - 140 + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2, true)
@@ -63,15 +63,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   ctx.drawImage(avatar, 100, height - 140, avatarSize, avatarSize)
   ctx.restore()
 
-  // Texto de frase
+  // Texto de frase (más grande)
   ctx.fillStyle = '#ffffff'
-  ctx.font = '28px sans-serif'
-  wrapText(ctx, `"${frase}"`, 260, 100, 600, 36)
+  ctx.font = '38px sans-serif'
+  wrapText(ctx, `"${frase}"`, 280, 100, 580, 44)
 
   // Autor
   ctx.fillStyle = '#dddddd'
-  ctx.font = '20px sans-serif'
-  ctx.fillText(`- ${name}`, 260, height - 50)
+  ctx.font = '22px sans-serif'
+  ctx.fillText(`- ${name}`, 280, height - 50)
 
   const out = join(tmpdir(), `frase_${user.split('@')[0]}.png`)
   writeFileSync(out, canvas.toBuffer())
