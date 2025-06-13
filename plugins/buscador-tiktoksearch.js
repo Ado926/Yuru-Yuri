@@ -1,32 +1,35 @@
+import axios from 'axios';
+
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text) {
       return conn.reply(m.chat, `> ᰔᩚ Ejemplo de uso: ${usedPrefix + command} Mini Dog`, m);
     }
+
     m.react('🕒');
     let old = new Date();
     let res = await ttks(text);
-    let videos = res.data; 
+    let videos = res.data;
+
     if (!videos.length) {
       return conn.reply(m.chat, "No se encontraron videos.", m);
     }
-    let cap = `「 𝖳𝗂𝗄𝗍𝗈𝗄 - 𝖲𝖾𝖺𝗋𝖼𝗁 」\n\n`
-            + `➮ ✐ 𝗧𝗶𝘁𝘂𝗹𝗼 » ${videos[0].title}\n`
-            + `➮ ☄︎ 𝗕𝘂𝘀𝗾𝘂𝗲𝗱𝗮 » ${text}`
 
-    let medias = videos.map((video, index) => ({
-      type: "video",
-      data: { url: video.no_wm },
-      caption: index === 0 
-        ? cap 
-        : `❀ *Titulo* » ${video.title}\n☁︎ *Process* » ${((new Date() - old) * 1)} ms`
-    }));
-    await conn.sendSylphy(m.chat, medias, { quoted: m });
+    for (let i = 0; i < videos.length; i++) {
+      let video = videos[i];
+      let caption = i === 0
+        ? `「 𝖳𝗂𝗄𝗍𝗈𝗄 - 𝖲𝖾𝖺𝗋𝖼𝗁 」\n\n➮ ✐ 𝗧𝗶𝘁𝘂𝗹𝗼 » ${video.title}\n➮ ☄︎ 𝗕𝘂𝘀𝗾𝘂𝗲𝗱𝗮 » ${text}`
+        : `❀ *Titulo* » ${video.title}\n☁︎ *Process* » ${((new Date() - old) * 1)} ms`;
+
+      await conn.sendFile(m.chat, video.no_wm, 'tiktok.mp4', caption, m);
+    }
+
     m.react('✅');
   } catch (e) {
     return conn.reply(m.chat, `Ocurrió un problema al obtener los videos:\n\n` + e, m);
   }
 };
+
 handler.command = ["ttsesearch", "tiktoks", "ttrndm", "ttks", "tiktoksearch"];
 handler.help = ["ttsearch"];
 handler.tags = ["download"];
@@ -49,8 +52,10 @@ async function ttks(query) {
         HD: 1
       }
     });
+
     const videos = response.data.data.videos;
-    if (videos.length === 0) throw new Error("⚠️ No se encontraron videos para esa búsqueda.");
+    if (!videos.length) throw new Error("⚠️ No se encontraron videos para esa búsqueda.");
+
     const shuffled = videos.sort(() => 0.5 - Math.random()).slice(0, 5);
     return {
       status: true,
