@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 const handler = async (m, { conn, text, command }) => {
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, '🎧 Ingresa el nombre o link del video.', m)
+      return conn.reply(m.chat, '> Ingresa el nombre del video.', m)
     }
 
     let url = ''
@@ -49,7 +49,7 @@ const handler = async (m, { conn, text, command }) => {
       },
     }
 
-    await conn.reply(m.chat, infoMessage, m, JT)
+    await conn.reply(m.chat, infoMessage, m, thumb)
 
     if (['play', 'mp3', 'playaudio'].includes(command)) {
       const api = await (await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)).json()
