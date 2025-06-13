@@ -85,6 +85,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.help = ['mensaje <texto|etiqueta>']
 handler.tags = ['maker']
-handler.command = /^mensaje|quote|frases?$/i
+handler.command = ['quote']
 
 export default handler
