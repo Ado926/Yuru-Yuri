@@ -30,7 +30,7 @@ const mundo = `${bandera} ${pais}`;
 │➮ *Modo* » Publico
 │✦ *Bot* » ${(conn.user.jid == global.conn.user.jid ? 'Principal 🅥' : 'Sub Bot 🅑')}
 │ⴵ *Activada* » ${uptime}
-│• *Usuarios » ${totalreg}
+│• *Usuarios* » ${totalreg}
 │• *Comandos* » ${totalCommands}
 │• *País* » ${mundo}
 │• *Baileys* » Multi Device
@@ -588,7 +588,7 @@ const mundo = `${bandera} ${pais}`;
           forwardingScore: 999,
           externalAdReply: {
               title: packname,
-              body: textbot,
+              body: packname,
               thumbnailUrl: banner,
               sourceUrl: redes,
               mediaType: 1,
