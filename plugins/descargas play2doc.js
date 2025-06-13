@@ -59,7 +59,7 @@ const handler = async (m, { conn, text, command }) => {
         mimetype: 'audio/mpeg',
         ptt: false
       }, { quoted: m })
-    } else if (command === 'play2' || command === 'mp4' || command === 'playvideo') {
+    } else if (command === 'play2' || command === 'mp4' || command === 'playvidoc') {
       const res = await fetch(`https://api.vreden.my.id/api/ytmp4?url=${url}`)
       const json = await res.json()
       const videoURL = json.result?.download?.url
