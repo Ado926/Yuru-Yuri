@@ -33,7 +33,7 @@ let handler = async (m, { conn, usedPrefix, text, args, command }) => {
             `item4.X-ABLabel:Región\nEND:VCARD`,
     }];
 
-    const imageUrl = 'https://files.catbox.moe/tlz2zt.jpg';
+    const imageUrl = 'https://qu.ax/dychF.jpg';
 
     // Texto personalizado para el reply
     const dev = `Desarrollador: ${ownerName}`;
