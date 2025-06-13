@@ -26,11 +26,11 @@ const handler = async (m, { conn, text, command }) => {
     const canal = author?.name || 'Desconocido'
     const vistas = formatViews(views)
 
-    const infoMessage = `「✦」Descargando *<${title}>*\n\n` +
+    const infoMessage = `「✦」 *<${title}>*\n\n` +
       `> ✧ Canal » *${canal}*\n` +
       `> ✰ Vistas » *${vistas}*\n` +
       `> ⴵ Duración » *${timestamp}*\n` +
-      `> ✐ Publicado » *${ago}*\n` +
+      `> ✐ Publicacion » *${ago}*\n` +
       `> 🜸 Link » ${url}`
 
     const thumb = (await conn.getFile(thumbnail))?.data
