@@ -28,7 +28,7 @@ const mundo = `${bandera} ${pais}`;
 ᴀǫᴜɪ ᴛɪᴇɴᴇs ʟᴀ ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs
 ╭┈ ↷
 │➮ *Modo* » Publico
-│✦ *Bot* » ${(conn.user.jid == global.conn.user.jid ? 'Principal 🅥' : 'Prem Bot 🅑')}
+│✦ *Bot* » ${(conn.user.jid == global.conn.user.jid ? 'Principal 🅥' : 'Sub Bot 🅑')}
 │ⴵ *Activada* » ${uptime}
 │• *Usuarios » ${totalreg}
 │• *Comandos* » ${totalCommands}
@@ -587,7 +587,7 @@ const mundo = `${bandera} ${pais}`;
           },
           forwardingScore: 999,
           externalAdReply: {
-              title: botname,
+              title: packname,
               body: textbot,
               thumbnailUrl: banner,
               sourceUrl: redes,
