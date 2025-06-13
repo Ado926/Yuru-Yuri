@@ -12,7 +12,7 @@ let results = api.data[0];
 let txt = `*「✦」 ${results.title}*
 
 > ✦ *Canal* » ${results.author.name}\n> ⴵ *Duración:* » ${results.duration}\n> ✰ *Vistas:* » ${results.views}
-> ✐Publicación » ${results.publishedAt} \n> ❒ *Tamaño:* » ${results.HumanReadable}\n> 🜸 *Link* » ${results.url} `;
+> ✐Publicación » ${results.publishedAt}\n> 🜸 *Link* » ${results.url} `;
 
 let img = results.image;
 
@@ -20,9 +20,11 @@ conn.sendMessage(m.chat, { image: { url: img }, caption: txt }, { quoted: m });
 
 let api2 = await(await fetch(`https://api.vreden.my.id/api/ytmp3?url=${results.url}`)).json();
 
-// if (!api2?.result?.download.url) return m.reply('No Se  Encontraron Resultados');
-
-await conn.sendMessage(m.chat, { document: { url: api2.result.download.url }, mimetype: 'audio/mpeg', fileName: `${results.title}.mp3` }, { quoted: m });
+await conn.sendMessage(m.chat, { 
+  audio: { url: api2.result.download.url }, 
+  mimetype: 'audio/mpeg', 
+  ptt: true // ← ahora se envía como nota de voz 
+}, { quoted: m });
 
 } catch (e) {
 m.reply(`Error: ${e.message}`);
