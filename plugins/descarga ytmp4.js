@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text }) => {
   try {
-    if (!text || !text.match(/^https?:\/\/(www\.youtube\.com|youtu\.be)/i)) {
+    if (!text || !/^https?:\/\/(www\.youtube\.com|youtu\.be)/i.test(text)) {
       return m.reply('🔗 *Ingresa un enlace de YouTube válido!*');
     }
 
@@ -14,19 +14,18 @@ const handler = async (m, { conn, text }) => {
     }
 
     const title = json.result?.title || 'video';
-    const cleanTitle = title.replace(/[\\/:*?"<>|]/g, '');
     const videoUrl = json.result.download.url;
 
     await conn.sendMessage(m.chat, {
-      document: { url: videoUrl },
-      fileName: `${cleanTitle}.mp4`,
+      video: { url: videoUrl },
+      caption: `🎬 *${title}*`,
+      fileName: `${title.replace(/[\\/:*?"<>|]/g, '')}.mp4`,
       mimetype: 'video/mp4',
-      caption: `🎬 *${title}*\n\n📥 *Descarga completada con éxito!*`,
     }, { quoted: m });
 
   } catch (e) {
     console.error(e);
-    m.reply(`❌ Error: ${e.message || 'Falló la descarga.'}`);
+    m.reply(`❌ Error: ${e.message || 'Falló la descarga del video.'}`);
   }
 };
 
