@@ -42,7 +42,7 @@ global.yukiJadibts = true
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
-global.packname = '✿ sumi sakurasawa ✿'
+global.packname = '✿ ʏᴜʀᴜ ʏᴜʀɪ ✿'
 global.botname = '✿ sumi sakurasawa ✿'
 global.wm = ''
 global.author = ''
@@ -52,7 +52,7 @@ global.etiqueta = ''
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
-global.moneda = '¥enes'
+global.moneda = 'Chocos'
 global.welcom1 = '➮ Edita Con El Comando setwelcome'
 global.welcom2 = '➮ Edita Con El Comando setbye'
 global.banner = 'https://files.catbox.moe/a161qy.jpg'
