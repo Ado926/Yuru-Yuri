@@ -46,7 +46,7 @@ global.packname = '✿ ʏᴜʀᴜ ʏᴜʀɪ ✿'
 global.botname = '☔︎︎ ᴛʜᴇ ʏᴜʀᴜ ʏᴜʀɪ | ᴠ1 ☁︎'
 global.wm = "☔︎︎ ᴛʜᴇ ʏᴜʀᴜ ʏᴜʀɪ | ᴠ1 ☁︎";
 global.author = ''
-global.dev = ''
+global.dev = '✐ Made With Wirk And Maycol ☁︎'
 global.textbot = ''
 global.etiqueta = ''
 
