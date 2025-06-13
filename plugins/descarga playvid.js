@@ -11,7 +11,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, `> Ingresa el nombre del video a descripción.`, m);
+      return conn.reply(m.chat, `> Ingresa el nombre del video a descargar.`, m);
     }
 
     const search = await yts(text);
