@@ -1,107 +1,68 @@
-import axios from 'axios';
-const {
-  proto,
-  generateWAMessageFromContent,
-  prepareWAMessageMedia,
-  generateWAMessageContent,
-  getDevice
-} = (await import("@whiskeysockets/baileys")).default;
-
-let handler = async (message, { conn, text, usedPrefix, command }) => {
-  if (!text) {
-    return conn.reply(message.chat, "❀ Por favor, ingrese un texto para realizar una búsqueda en tiktok.", message, rcanal);
-  }
-
-  async function createVideoMessage(url) {
-    const { videoMessage } = await generateWAMessageContent({
-      video: { url }
-    }, {
-      upload: conn.waUploadToServer
-    });
-    return videoMessage;
-  }
-
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
+const handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
-    conn.reply(message.chat, '✧ *ENVIANDO SUS RESULTADOS..*', message, {
-      contextInfo: { 
-        externalAdReply: { 
-          mediaUrl: null, 
-          mediaType: 1, 
-          showAdAttribution: true,
-          title: '♡  ͜ ۬︵࣪᷼⏜݊᷼𝘿𝙚𝙨𝙘𝙖𝙧𝙜𝙖𝙨⏜࣪᷼︵۬ ͜ ',
-          body: dev,
-          previewType: 0, 
-          thumbnail: avatar,
-          sourceUrl: redes 
-        }
-      }
-    });
-
-    let results = [];
-    let { data } = await axios.get("https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=" + text);
-    let searchResults = data.data;
-    shuffleArray(searchResults);
-    let topResults = searchResults.splice(0, 7);
-
-    for (let result of topResults) {
-      results.push({
-        body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: dev }),
-        header: proto.Message.InteractiveMessage.Header.fromObject({
-          title: '' + result.title,
-          hasMediaAttachment: true,
-          videoMessage: await createVideoMessage(result.nowm)
-        }),
-        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
-      });
+    if (!text) {
+      return conn.reply(m.chat, `> ᰔᩚ Ejemplo de uso: ${usedPrefix + command} Mini Dog`, m);
     }
+    m.react('🕒');
+    let old = new Date();
+    let res = await ttks(text);
+    let videos = res.data; 
+    if (!videos.length) {
+      return conn.reply(m.chat, "No se encontraron videos.", m);
+    }
+    let cap = `「 𝖳𝗂𝗄𝗍𝗈𝗄 - 𝖲𝖾𝖺𝗋𝖼𝗁 」\n\n`
+            + `➮ ✐ 𝗧𝗶𝘁𝘂𝗹𝗼 » ${videos[0].title}\n`
+            + `➮ ☄︎ 𝗕𝘂𝘀𝗾𝘂𝗲𝗱𝗮 » ${text}`
 
-    const messageContent = generateWAMessageFromContent(message.chat, {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: {
-            deviceListMetadata: {},
-            deviceListMetadataVersion: 2
-          },
-          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-            body: proto.Message.InteractiveMessage.Body.create({
-              text: "✧ RESULTADO DE: " + text
-            }),
-            footer: proto.Message.InteractiveMessage.Footer.create({
-              text: dev
-            }),
-            header: proto.Message.InteractiveMessage.Header.create({
-              hasMediaAttachment: false
-            }),
-            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-              cards: [...results]
-            })
-          })
-        }
-      }
-    }, {
-      quoted: message
-    });
-
-    await conn.relayMessage(message.chat, messageContent.message, {
-      messageId: messageContent.key.id
-    });
-  } catch (error) {
-    conn.reply(message.chat, `⚠︎ *OCURRIÓ UN ERROR:* ${error.message}`, message);
+    let medias = videos.map((video, index) => ({
+      type: "video",
+      data: { url: video.no_wm },
+      caption: index === 0 
+        ? cap 
+        : `❀ *Titulo* » ${video.title}\n☁︎ *Process* » ${((new Date() - old) * 1)} ms`
+    }));
+    await conn.sendSylphy(m.chat, medias, { quoted: m });
+    m.react('✅');
+  } catch (e) {
+    return conn.reply(m.chat, `Ocurrió un problema al obtener los videos:\n\n` + e, m);
   }
 };
-
-handler.help = ["tiktoksearch <txt>"];
-handler.register = true
-handler.group = true
-handler.tags = ["buscador"];
-handler.command = ["tiktoksearch", "ttss", "tiktoks"];
-
+handler.command = ["ttsesearch", "tiktoks", "ttrndm", "ttks", "tiktoksearch"];
+handler.help = ["ttsearch"];
+handler.tags = ["download"];
 export default handler;
+
+async function ttks(query) {
+  try {
+    const response = await axios({
+      method: 'POST',
+      url: 'https://tikwm.com/api/feed/search',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Cookie': 'current_language=en',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+      },
+      data: {
+        keywords: query,
+        count: 20,
+        cursor: 0,
+        HD: 1
+      }
+    });
+    const videos = response.data.data.videos;
+    if (videos.length === 0) throw new Error("⚠️ No se encontraron videos para esa búsqueda.");
+    const shuffled = videos.sort(() => 0.5 - Math.random()).slice(0, 5);
+    return {
+      status: true,
+      creator: "Made With Maycol And Wirk",
+      data: shuffled.map(video => ({
+        title: video.title,
+        no_wm: video.play,
+        watermark: video.wmplay,
+        music: video.music
+      }))
+    };
+  } catch (error) {
+    throw error;
+  }
+}
