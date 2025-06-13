@@ -35,11 +35,29 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   const name = await conn.getName(user)
 
   const defaultImg = 'https://i.imgur.com/axnP93g.png'
-  let imgUrl = await conn.profilePictureUrl(user, 'image').catch(_ => defaultImg)
-  const res = await fetch(imgUrl)
-  const avatarBuffer = await res.buffer()
-  const avatar = await loadImage(avatarBuffer)
+  let imgUrl
 
+  try {
+    imgUrl = await conn.profilePictureUrl(user, 'image')
+  } catch {
+    imgUrl = defaultImg
+  }
+
+  // Cargar imagen con validación
+  let avatar
+  try {
+    const res = await fetch(imgUrl)
+    const type = res.headers.get('content-type') || ''
+    if (!type.startsWith('image')) throw new Error('No es una imagen')
+    const buffer = await res.buffer()
+    avatar = await loadImage(buffer)
+  } catch {
+    const res = await fetch(defaultImg)
+    const buffer = await res.buffer()
+    avatar = await loadImage(buffer)
+  }
+
+  // Fondo
   const bgRes = await fetch('https://files.catbox.moe/6tno0n.jpg')
   const bgBuffer = await bgRes.buffer()
   const bgImage = await loadImage(bgBuffer)
@@ -48,7 +66,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   const canvas = createCanvas(width, height)
   const ctx = canvas.getContext('2d')
 
-  // Fondo
   ctx.drawImage(bgImage, 0, 0, width, height)
   ctx.fillStyle = 'rgba(0,0,0,0.5)'
   ctx.fillRect(0, 0, width, height)
@@ -63,7 +80,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   ctx.drawImage(avatar, 100, height - 140, avatarSize, avatarSize)
   ctx.restore()
 
-  // Texto de frase (más grande)
+  // Frase
   ctx.fillStyle = '#ffffff'
   ctx.font = '38px sans-serif'
   wrapText(ctx, `"${frase}"`, 280, 100, 580, 44)
