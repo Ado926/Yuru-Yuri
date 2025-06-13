@@ -12,8 +12,8 @@ let handler = async (m, {text, usedPrefix, command, conn}) => {
   if (x.Response === "False") throw `*[❕] No se encontró la película: ${text}*`;
 
   // Definiendo las variables 'comienzo' y 'fin'
-  const comienzo = "🎬"; // Puedes cambiar esto por lo que desees
-  const fin = "🎬"; // Puedes cambiar esto por lo que desees
+  const comienzo = "✧"; // Puedes cambiar esto por lo que desees
+  const fin = "✿"; // Puedes cambiar esto por lo que desees
 
   let mov_txt = `*${comienzo}「 PELÍCULAS 」${fin}*\n
 *Titulo ∙* ${x.Title || "-"}
@@ -37,6 +37,6 @@ let handler = async (m, {text, usedPrefix, command, conn}) => {
   await conn.sendMessage(m.chat, {image: {url: x.Poster}, caption: mov_txt, mentions: [m.sender]}, {quoted: m});
 };
 
-handler.command = /^(película|pelicula|peli)$/i;
+handler.command = ['pelicula', 'peli'];
 handler.limit = true;
 export default handler;
