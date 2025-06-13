@@ -19,7 +19,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
                 + `☁︎ *Busqueda:* ${text}\n`
                 + `☄︎ *Tiempo:* ${((new Date() - old))} ms\n\n`;
 
-    caption += videos.map((v, i) => `🎬 *${i + 1}.* ${v.title}\n🔗 ${v.no_wm}`).join('\n\n');
+    caption += videos.map((v, i) => `> ✐ *${i + 1}.* ${v.title}\n🔗 ${v.no_wm}`).join('\n\n');
 
     // Envía solo el primer video como vista previa con la lista completa
     await conn.sendFile(m.chat, videos[0].no_wm, 'video.mp4', caption, m);
