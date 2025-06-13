@@ -7,7 +7,7 @@ const handler = async (m, { conn, text, command }) => {
     }
 
     // Reacción de carga ⏳
-    await conn.react(m.chat, '🕒', m.key);
+    await m.react('🕒');
 
     const res = await fetch(`https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(text)}`);
     const json = await res.json();
@@ -28,11 +28,11 @@ const handler = async (m, { conn, text, command }) => {
     }, { quoted: m });
 
     // Reacción de éxito 👍
-    await conn.react(m.chat, '✅', m.key);
+    await m.react('✅');
 
   } catch (e) {
     console.error(e);
-    await conn.react(m.chat, '❌', m.key);
+    await m.react('❌');
     return m.reply(`❌ Error: ${e.message || 'Falló la descarga del video.'}`);
   }
 };
