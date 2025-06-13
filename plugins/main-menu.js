@@ -24,7 +24,7 @@ const mundo = `${bandera} ${pais}`;
     let totalCommands = Object.values(global.plugins).filter((v) => v.help && v.tags).length
 
     let txt = `
-𝐇𝐨𝐥𝐚, @${userId.split('@')[0]}! 𝐒𝐨𝐲 *${botname}*
+𝐇𝐨𝐥𝐚, @${userId.split('@')[0]}! 𝐒𝐨𝐲 *${packname}*
 ᴀǫᴜɪ ᴛɪᴇɴᴇs ʟᴀ ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs
 ╭┈ ↷
 │➮ *Modo* » Publico
@@ -588,7 +588,7 @@ const mundo = `${bandera} ${pais}`;
           forwardingScore: 999,
           externalAdReply: {
               title: packname,
-              body: packname,
+              body: textbot,
               thumbnailUrl: banner,
               sourceUrl: redes,
               mediaType: 1,
