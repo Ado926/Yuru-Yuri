@@ -587,7 +587,7 @@ const mundo = `${bandera} ${pais}`;
           },
           forwardingScore: 999,
           externalAdReply: {
-              title: packname,
+              title: botname,
               body: textbot,
               thumbnailUrl: banner,
               sourceUrl: redes,
