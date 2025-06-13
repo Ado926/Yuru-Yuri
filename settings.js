@@ -43,8 +43,8 @@ global.yukiJadibts = true
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
 global.packname = '✿ ʏᴜʀᴜ ʏᴜʀɪ ✿'
-global.botname = '✿ sumi sakurasawa ✿'
-global.wm = ''
+global.botname = '☔︎︎ ᴛʜᴇ ʏᴜʀᴜ ʏᴜʀɪ | ᴠ1 ☁︎'
+global.wm = "☔︎︎ ᴛʜᴇ ʏᴜʀᴜ ʏᴜʀɪ | ᴠ1 ☁︎";
 global.author = ''
 global.dev = ''
 global.textbot = ''
