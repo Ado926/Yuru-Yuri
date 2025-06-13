@@ -1,31 +1,36 @@
-import Starlights from '@StarlightsTeam/Scraper'
-import fetch from 'node-fetch' 
-let limit = 100
+import fetch from 'node-fetch'
 
-let handler = async (m, { conn, args, text, isPrems, isOwner, usedPrefix, command }) => {
-if (!args[0]) return conn.reply(m.chat, '[ ✰ ] Ingresa el enlace del vídeo de *YouTube* junto al comando.\n\n`» Ejemplo :`\n' + `> *${usedPrefix + command}* https://youtu.be/QSvaCSt8ixs`, m, rcanal)
+const handler = async (m, { conn, text, command }) => {
+  try {
+    if (!text || !text.match(/^https?:\/\/(www\.youtube\.com|youtu\.be)/i)) {
+      return m.reply('🔗 *Ingresa un enlace de YouTube válido!*')
+    }
 
-await m.react('🕓')
-try {
-let { title, size, quality, thumbnail, dl_url } = await Starlights.ytmp4(args[0])
+    const res = await fetch(`https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(text)}`)
+    const json = await res.json()
 
-let img = await (await fetch(`${thumbnail}`)).buffer()
-if (size.split('MB')[0] >= limit) return conn.reply(m.chat, `El archivo pesa mas de ${limit} MB, se canceló la Descarga.`, m, rcanal).then(_ => m.react('✖️'))
-        let txt = '`乂  Y O U T U B E  -  M P 4`\n\n'
-       txt += `        ✩   *Titulo* : ${title}\n`
-       txt += `        ✩   *Calidad* : ${quality}\n`
-       txt += `        ✩   *Tamaño* : ${size}\n\n`
-       txt += `> *- ↻ El vídeo se esta enviando espera un momento, soy lenta. . .*`
-await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
-await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: `${title}`, mimetype: 'video/mp4', fileName: `${title}` + `.mp4`}, {quoted: m })
-await m.react('✅')
-} catch {
-await m.react('✖️')
-}}
-handler.help = ['ytmp4 *<link yt>*']
+    if (!json.status || !json.result?.download?.url) {
+      throw new Error('❌ No se pudo descargar el video.')
+    }
+
+    const { title, download } = json.result
+    const cleanTitle = title.replace(/[\\/:*?"<>|]/g, '')
+    const url = download.url
+
+    await conn.sendMessage(m.chat, {
+      document: { url },
+      fileName: `${cleanTitle}.mp4`,
+      mimetype: 'video/mp4',
+      caption: `🎬 *${title}*\n\n`,
+    }, { quoted: m })
+
+  } catch (e) {
+    console.error(e)
+    m.reply(`❌ Error: ${e.message || 'Falló la descarga.'}`)
+  }
+}
+
+handler.command = ['ytmp4']
+handler.help = ['ytmp4 <enlace>']
 handler.tags = ['downloader']
-handler.command = ['ytmp4', 'ytv', 'yt']
-//handler.limit = 1
-handler.register = true 
-
 export default handler
