@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 const handler = async (m, { conn, text, command }) => {
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, '> Ingresa el nombre del video.', m)
+      return conn.reply(m.chat, '> Ingresa el nombre o link del video.', m)
     }
 
     let url = ''
@@ -30,11 +30,13 @@ const handler = async (m, { conn, text, command }) => {
       `> ✧ Canal » *${canal}*\n` +
       `> ✰ Vistas » *${vistas}*\n` +
       `> ⴵ Duración » *${timestamp}*\n` +
-      `> ✐ Publicacion » *${ago}*\n` +
+      `> ✐ Publicación » *${ago}*\n` +
       `> 🜸 Link » ${url}`
 
     const thumb = (await conn.getFile(thumbnail))?.data
-    const JT = {
+
+    // Mostrar información previa
+    await conn.reply(m.chat, infoMessage, m, {
       contextInfo: {
         externalAdReply: {
           title: title,
@@ -46,11 +48,10 @@ const handler = async (m, { conn, text, command }) => {
           thumbnail: thumb,
           renderLargerThumbnail: true,
         },
-      },
-    }
+      }
+    })
 
-    await conn.reply(m.chat, infoMessage, m, thumb)
-
+    // ▶ Audio
     if (['play', 'mp3', 'playaudio'].includes(command)) {
       const api = await (await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)).json()
       const audioURL = api.result?.download?.url
@@ -63,6 +64,7 @@ const handler = async (m, { conn, text, command }) => {
       }, { quoted: m })
     }
 
+    // 🎬 Video como DOCUMENTO (archivo)
     if (['play2', 'mp4', 'playvidoc'].includes(command)) {
       const res = await fetch(`https://api.vreden.my.id/api/ytmp4?url=${url}`)
       const json = await res.json()
@@ -75,7 +77,18 @@ const handler = async (m, { conn, text, command }) => {
         document: { url: videoURL },
         fileName: `${videoTitle}.mp4`,
         mimetype: 'video/mp4',
-        caption: `🎬 ${videoTitle}`
+        caption: `🎬 ${videoTitle}`,
+        contextInfo: {
+          externalAdReply: {
+            title: videoTitle,
+            body: 'Video descargado',
+            mediaType: 2,
+            thumbnail: thumb,
+            mediaUrl: url,
+            sourceUrl: url,
+            renderLargerThumbnail: true
+          }
+        }
       }, { quoted: m })
     }
 
@@ -85,10 +98,12 @@ const handler = async (m, { conn, text, command }) => {
   }
 }
 
-handler.command = handler.help = ['playvidoc']
+handler.command = ['playvidoc']
+handler.help = ['playvidoc']
 handler.tags = ['downloader']
 export default handler
 
+// Función para dar formato a vistas
 function formatViews(views) {
   if (!views) return "No disponible"
   if (views >= 1_000_000_000) return `${(views / 1_000_000_000).toFixed(1)}B (${views.toLocaleString()})`
@@ -97,6 +112,7 @@ function formatViews(views) {
   return views.toString()
 }
 
+// Función para extraer ID de video
 function extractVideoId(url) {
   const reg = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
   const match = url.match(reg)
