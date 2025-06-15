@@ -117,9 +117,9 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
 // Definición simulada para evitar ReferenceError
-const Browsers = {
-  macOS: (type) => type
-}
+//const Browsers = {
+ // macOS: (type) => type
+//}
 
 // Ejemplo de asignación de opcion y otros flags que usas
 let opcion;
