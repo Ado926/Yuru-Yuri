@@ -38,11 +38,13 @@ global.fotoperfil = await conn.profilePictureUrl(m.sender, 'image').catch(_ => '
 
 global.canalIdM = [
   "120363402846939411@newsletter",
-  "120363420047428304@newsletter"
+  "120363420047428304@newsletter",
+  "120363420941524030@newsletter"
 ]
 global.canalNombreM = [
   "✦ sʏᴀ ᴛᴇᴀᴍ | 2025 ✧",
-  "✧❅ꨄ ʏᴜʀᴜ ʏᴜʀɪ ┋ᴄʜᴀɴɴᴇʟ ☙❢❀"
+  "✧❅ꨄ ʏᴜʀᴜ ʏᴜʀɪ ┋ᴄʜᴀɴɴᴇʟ ☙❢❀",
+  "🔥 𝗩𝗶𝗿𝗮𝗹𝗦𝘁𝗶𝗰𝗸 & 𝗠𝗲𝗺𝗲𝘀 𝗕𝘆 𝗦𝗬𝗔 🎬"
 ]
 global.channelRD = await getRandomChannel()
 
@@ -59,10 +61,10 @@ global.done = '✅'
 global.error = '✖️'
 global.msm = '⚠︎'
 
-global.emoji = '❀'
-global.emoji2 = '✧'
+global.emoji = '» ✧ «'
+global.emoji2 = '「✿」'
 global.emoji3 = '✦'
-global.emoji4 = '❍'
+global.emoji4 = '【❀】'
 global.emoji5 = '✰'
 global.emojis = [emoji, emoji2, emoji3, emoji4].getRandom()
 
