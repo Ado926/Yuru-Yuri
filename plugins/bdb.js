@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 
 let limit = 100
 
-let handler = async (m, { conn, args, text, isPrems, isOwner, usedPrefix, command }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0] || !args[0].includes('youtu')) {
     return conn.reply(m.chat, '[ ✰ ] Ingresa un enlace válido de *YouTube*.\n\n> *Ejemplo:* \n' + `> *${usedPrefix + command}* https://youtu.be/QSvaCSt8ixs`, m, rcanal)
   }
@@ -12,12 +12,15 @@ let handler = async (m, { conn, args, text, isPrems, isOwner, usedPrefix, comman
 
   try {
     let res = await Starlights.ytmp4(args[0])
+
     if (!res || !res.title || !res.dl_url) {
-      throw new Error('❌ No se pudo obtener información del video.')
+      // Si no hay respuesta válida, intentamos enviar el enlace directamente
+      await m.react('⚠️')
+      return conn.reply(m.chat, `❌ No se pudo obtener información del video.\n\n🔗 Aquí tienes el enlace directo:\n${args[0]}`, m)
     }
 
     let { title, size, quality, thumbnail, dl_url } = res
-    console.log({ title, size, quality, thumbnail, dl_url }) // Para debug
+    console.log({ title, size, quality, thumbnail, dl_url })
 
     if (!size.includes('MB')) {
       throw new Error(`❌ El tamaño no está en MB: ${size}`)
@@ -48,7 +51,7 @@ let handler = async (m, { conn, args, text, isPrems, isOwner, usedPrefix, comman
     await m.react('✅')
 
   } catch (e) {
-    console.error('🛑 Error en el comando .ytmp4:', e)
+    console.error('🛑 Error en el comando .yt:', e)
     await m.react('✖️')
     await conn.reply(m.chat, `❌ *Ocurrió un error al descargar el video:*\n\n${e.message}`, m)
   }
