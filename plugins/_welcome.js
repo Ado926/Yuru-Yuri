@@ -8,7 +8,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let img = await (await fetch(`${pp}`)).buffer()
   let chat = global.db.data.chats[m.chat]
   let txt = '✿ BIENVENID@ ✿'
-  let txt1 = '✿ ADIOS ✿'
+  let txt1 = '✿ HASTA LUEGO ✿'
   let groupSize = participants.length
   if (m.messageStubType == 27) {
     groupSize++;
