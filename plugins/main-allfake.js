@@ -97,8 +97,10 @@ global.taguser = '@' + m.sender.split("@s.whatsapp.net")
 var more = String.fromCharCode(8206)
 global.readMore = more.repeat(850)
 
-global.packsticker = `✧ 𝖸𝗎𝗋𝗎 𝖸𝗎𝗋𝗂 𝗦𝗧𝗜𝗖𝗞𝗘𝗥𝗦 ✧`
-;global.packsticker2 = `⛓️‍💥 ᴍᴀᴅᴇ ʙʏ ${botname}\n💜 ᴜsᴜᴀʀɪᴏ: ${nombre} 🍁 𝙾𝚆𝙽𝙴𝚁: Wirk`
+global.packsticker = `✧ 𝖸𝗎𝗋𝗎 𝖸𝗎𝗋𝗂 𝗦𝗧𝗜𝗖𝗞𝗘𝗥𝗦 ✧
+💜 ᴜsᴜᴀʀɪᴏ: ${nombre}
+⛓️‍💥 ᴍᴀᴅᴇ ʙʏ ${botname}`;
+global.packsticker2 = `🍁 𝙾𝚆𝙽𝙴𝚁: Wirk`
   
 global.fkontak = { key: {participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJid: `6285600793871-1614953337@g.us` } : {}) }, message: { 'contactMessage': { 'displayName': `${nombre}`, 'vcard': `BEGIN:VCARD\nVERSION:3.0\nN:XL;${nombre},;;;\nFN:${nombre},\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`, 'jpegThumbnail': null, thumbnail: null,sendEphemeral: true}}}
 
