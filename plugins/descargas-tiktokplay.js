@@ -17,11 +17,10 @@ const handler = async (m, {
 
   let vid = json.data[0];
 
-  let caption = `「💜」*${vid.title}*
+  let caption = `「💜」*${vid.title}
 
 > ✦ *Autor:* » ${vid.author}
 > ✰ *Vistas:* » ${vid.views.toLocaleString()}
-> ✐ *Descripción:* » ${vid.desc || 'Sin descripción'}
 > 🜸 *Link:* » ${vid.url}`;
 
   await conn.sendMessage(m.chat, {
