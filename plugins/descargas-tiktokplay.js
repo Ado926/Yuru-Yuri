@@ -8,16 +8,22 @@ const handler = async (m, {
     command
 }) => {
 
-  if (!text) return m.reply('Ingresa la consulta!\nEjemplo: playtiktok haikyuu edit');
+  if (!text) return m.reply(`✐ Ingresa una búsqueda para TikTok\n> *Ejemplo:* ${usedPrefix + command} haikyuu edit`);
+
   let res = await fetch(`https://apizell.web.id/download/tiktokplay?q=${encodeURIComponent(text)}`);
   let json = await res.json();
-  if (!json.status || !json.data || !json.data.length) return m.reply('Video no encontrado.');
+
+  if (!json.status || !json.data || !json.data.length) return m.reply('❌ No se encontró ningún video.');
+
   let vid = json.data[0];
-  let caption = `*Titulo:* ${vid.title}
-*Autor:* ${vid.author}
-*Vistas:* ${vid.views.toLocaleString()}
-*Descripción:* ${vid.desc || '-'}
-`;
+
+  let caption = `*「💜」 ${vid.title}*
+
+> ✦ *Autor:* » ${vid.author}
+> ✰ *Vistas:* » ${vid.views.toLocaleString()}
+> ✐ *Descripción:* » ${vid.desc || 'Sin descripción'}
+> 🜸 *Link:* » ${vid.url}`;
+
   await conn.sendMessage(m.chat, {
     video: { url: vid.url },
     caption,
@@ -34,8 +40,9 @@ const handler = async (m, {
     }
   }, { quoted: m });
 };
+
 handler.help = ['tiktokplay'];
 handler.tags = ['downloader'];
 handler.command = ['playtt', 'playtiktok'];
-handler.limit = true;
+
 export default handler;
