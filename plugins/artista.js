@@ -1,8 +1,9 @@
-// CODE OFC DE YURU YURI 🥵
 import fetch from "node-fetch";
 
+// Variable global para evitar procesos concurrentes en el comando .artista
 let isDownloadingArtist = false;
 
+// Función auxiliar que descarga un audio a partir de una URL de YouTube
 async function downloadTrack(youtubeUrl) {
   const encodedUrl = encodeURIComponent(youtubeUrl);
   const primaryAPI = `https://mahiru-shiina.vercel.app/download/ytmp3?url=${encodedUrl}`;
@@ -31,8 +32,9 @@ async function downloadTrack(youtubeUrl) {
       try {
         const response = await fetch(backupAPI);
         const json = await response.json();
-        if (json.status !== 200 || !json.result || !json.result.download)
+        if (json.status !== 200 || !json.result || !json.result.download) {
           throw new Error("Backup API: No se encontró el enlace de descarga.");
+        }
         resultJson = json;
         break;
       } catch (error) {
@@ -52,14 +54,13 @@ async function downloadTrack(youtubeUrl) {
     downloadUrl = resultJson.result.download?.url;
     title = resultJson.result.metadata?.title || "audio";
   }
-  if (!downloadUrl) throw new Error("No se encontró el enlace de descarga.");
 
+  if (!downloadUrl) throw new Error("No se encontró el enlace de descarga.");
   title = title.replace(/[^\w\s]/gi, '').substring(0, 60);
 
   let audioBuffer;
   const maxAudioAttempts = 2;
   let audioError = null;
-
   for (let attempt = 1; attempt <= maxAudioAttempts; attempt++) {
     try {
       const audioResponse = await fetch(downloadUrl);
@@ -68,7 +69,9 @@ async function downloadTrack(youtubeUrl) {
       break;
     } catch (error) {
       audioError = error;
-      if (attempt < maxAudioAttempts) await new Promise(resolve => setTimeout(resolve, 500));
+      if (attempt < maxAudioAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
     }
   }
 
@@ -79,8 +82,9 @@ async function downloadTrack(youtubeUrl) {
       try {
         const response = await fetch(backupAPI);
         const json = await response.json();
-        if (json.status !== 200 || !json.result || !json.result.download)
+        if (json.status !== 200 || !json.result || !json.result.download) {
           throw new Error("Backup API: No se encontró el enlace de descarga.");
+        }
         resultJson = json;
         break;
       } catch (error) {
@@ -88,6 +92,7 @@ async function downloadTrack(youtubeUrl) {
         if (attempt < maxAttempts) continue;
       }
     }
+
     if (resultJson && resultJson.result) {
       downloadUrl = resultJson.result.download?.url;
       title = resultJson.result.metadata?.title || "audio";
@@ -101,7 +106,9 @@ async function downloadTrack(youtubeUrl) {
           break;
         } catch (error) {
           audioError = error;
-          if (attempt < maxAudioAttempts) await new Promise(resolve => setTimeout(resolve, 500));
+          if (attempt < maxAudioAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
       }
     }
@@ -116,20 +123,20 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (command.toLowerCase() !== "artista") return;
 
   if (isDownloadingArtist) {
-    return conn.sendMessage(m.chat, { text: "⚠️ ¡Ya hay una descarga en curso! No interrumpas el proceso." }, { quoted: m, rcanal });
+    return conn.sendMessage(m.chat, { text: "⚠️ ¡Ya hay una descarga en curso! No interrumpas el proceso." }, global.rcanal);
   }
 
   if (!text || text.trim().length === 0) {
     return conn.sendMessage(m.chat, {
       text: `⚠️ *¡Atención!*\n\n💡 Debes proporcionar el nombre del artista.\n📌 Ejemplo: ${usedPrefix}artista TWICE`
-    }, { quoted: m, rcanal });
+    }, global.rcanal);
   }
 
   isDownloadingArtist = true;
 
   await conn.sendMessage(m.chat, {
     text: "🔔 *Iniciando descarga de música por artista.*\n\n⏳ Por favor, no interrumpas el proceso."
-  }, { quoted: m, rcanal });
+  }, global.rcanal);
 
   const searchUrl = `https://delirius-apiofc.vercel.app/search/searchtrack?q=${encodeURIComponent(text)}`;
   let searchResults;
@@ -138,13 +145,15 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     searchResults = await response.json();
     if (!Array.isArray(searchResults) || searchResults.length === 0) {
       isDownloadingArtist = false;
-      return conn.sendMessage(m.chat, { text: "⚠️ No se encontraron resultados para ese artista." }, { quoted: m, rcanal });
+      return conn.sendMessage(m.chat, {
+        text: "⚠️ No se encontraron resultados para ese artista."
+      }, global.rcanal);
     }
   } catch (error) {
     isDownloadingArtist = false;
     return conn.sendMessage(m.chat, {
       text: `❌ *Error al buscar música:* ${error.message || "Desconocido"}`
-    }, { quoted: m, rcanal });
+    }, global.rcanal);
   }
 
   const tracks = searchResults.slice(0, 10);
@@ -158,7 +167,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         mimetype: "audio/mpeg",
         fileName: `${title}.mp3`,
         caption: `🎶 *${track.title}*\n👤 *Artista:* ${track.artist}\n💽 *Álbum:* ${track.album || "Desconocido"}`
-      }, { quoted: m, rcanal });
+      }, { quoted: m, ...global.rcanal });
       await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
       console.error(`Error al descargar "${track.title}":`, error);
@@ -169,7 +178,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   isDownloadingArtist = false;
   await conn.sendMessage(m.chat, {
     text: "✅ *Descargas Finalizadas Exitosamente.*"
-  }, { quoted: m, rcanal });
+  }, global.rcanal);
 };
 
 handler.command = /^artista$/i;
