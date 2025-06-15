@@ -1,46 +1,71 @@
-import uploadFile from '../lib/uploadFile.js'
-import uploadImage from '../lib/uploadImage.js'
-import fetch from 'node-fetch'
+// Código ofc de Anya ⚔️
+//Creditos para SoyMaycol y Wirk
+import fetch from "node-fetch";
+import crypto from "crypto";
+import { FormData, Blob } from "formdata-node";
+import { fileTypeFromBuffer } from "file-type";
 
-let handler = async (m) => {
-  let q = m.quoted ? m.quoted : m
-  let mime = (q.msg || q).mimetype || ''
-  if (!mime) return conn.reply(m.chat, `${emoji} Por favor, responda a una *Imagen* o *Vídeo.*`, m)
-  await m.react(rwait)
+let handler = async (m, { conn }) => {
+  let q = m.quoted || m;
+  let mime = (q.msg || q).mimetype || '';
+  if (!mime) return conn.reply(m.chat, `📎 Por favor responde a un archivo válido (imagen, video, documento, etc).`, m, rcanal);
+
+  await m.react('🕒');
+
   try {
-  let media = await q.download()
-  let isTele = /image\/(png|jpe?g|gif)|video\/mp4/.test(mime)
-  let link = await (isTele ? uploadImage : uploadFile)(media)
-  let img = await (await fetch(`${link}`)).buffer()
-  let txt = `乂  *L I N K - E N L A C E*  乂\n\n`
-      txt += `*» Enlace* : ${link}\n`
-      txt += `*» Acortado* : ${await shortUrl(link)}\n`
-      txt += `*» Tamaño* : ${formatBytes(media.length)}\n`
-      txt += `*» Expiración* : ${isTele ? 'No expira' : 'Desconocido'}\n\n`
-      txt += `> *${dev}*`
+    let media = await q.download();
+    let linkData = await maybox(media, mime);
 
-await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, fkontak)
-await m.react(done)
-} catch {
-await m.react(error)
-}}
-handler.help = ['tourl']
-handler.tags = ['transformador']
-handler.register = true
-handler.command = ['tourl', 'upload']
+    if (!linkData?.data?.url) throw '❌ No se pudo subir el archivo';
 
-export default handler
+    let info = linkData.data;
+    let txt = `*🍫 Wirksi Box 🍫*\n\n`;
+    txt += `*📄 Archivo:* ${info.originalName}\n`;
+    txt += `*📦 Tamaño:* ${formatBytes(info.size)}\n`;
+    txt += `*📅 Subido:* ${formatDate(info.uploadedAt)}\n`;
+    txt += `*🔗 Enlace:* ${info.url}\n\n`;
+    txt += `> 🌐 *Servicio proporcionado por Wirk*`;
 
-function formatBytes(bytes) {
-  if (bytes === 0) {
-    return '0 B';
+    await conn.sendFile(m.chat, media, info.fileName, txt, m, rcanal);
+    await m.react('✅');
+  } catch (err) {
+    console.error(err);
+    await m.react('❌');
+    await conn.reply(m.chat, `🚫 Hubo un error al subir el archivo a WirksiBox. Intenta de nuevo más tarde.`, m, rcanal);
   }
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+};
+
+handler.help = ['tourl'];
+handler.tags = ['tools'];
+handler.command = ['wirksibox', 'tourl'];
+export default handler;
+
+// --- Funciones auxiliares ---
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B';
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / 1024 ** i).toFixed(2)} ${sizes[i]}`;
 }
 
-async function shortUrl(url) {
-        let res = await fetch(`https://tinyurl.com/api-create.php?url=${url}`)
-        return await res.text()
+function formatDate(date) {
+  return new Date(date).toLocaleString('es-ES', { timeZone: 'America/Tegucigalpa' });
+}
+
+async function maybox(content, mime) {
+  const { ext } = (await fileTypeFromBuffer(content)) || { ext: 'bin' };
+  const blob = new Blob([content.toArrayBuffer()], { type: mime });
+  const form = new FormData();
+  const filename = `${Date.now()}-${crypto.randomBytes(3).toString('hex')}.${ext}`;
+  form.append('file', blob, filename);
+
+  const res = await fetch('https://wirksibox.onrender.com/api/upload', {
+    method: 'POST',
+    body: form,
+    headers: {
+      'User-Agent': 'AnyaForger',
+    }
+  });
+
+  return await res.json();
 }
