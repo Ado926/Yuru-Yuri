@@ -116,69 +116,88 @@ const opcionTexto = chalk.bold.cyan
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (texto) => new Promise((resolver) => rl.question(texto, resolver))
 
-let opcion
+// Definición simulada para evitar ReferenceError
+const Browsers = {
+  macOS: (type) => type
+}
+
+// Ejemplo de asignación de opcion y otros flags que usas
+let opcion;
 if (methodCodeQR) {
-opcion = '1'
+  opcion = '1';
 }
+
 if (!methodCodeQR && !methodCode && !fs.existsSync(`./${sessions}/creds.json`)) {
-do {
-opcion = await question(colores('⌨ Seleccione una opción:\n') + opcionQR('1. Con código QR\n') + opcionTexto('2. Con código de texto de 8 dígitos\n--> '))
+  do {
+    opcion = await question(
+      colores('⌨ Seleccione una opción:\n') + 
+      opcionQR('1. Con código QR\n') + 
+      opcionTexto('2. Con código de texto de 8 dígitos\n--> ')
+    );
 
-if (!/^[1-2]$/.test(opcion)) {
-console.log(chalk.bold.redBright(`✦ No se permiten numeros que no sean 1 o 2, tampoco letras o símbolos especiales.`))
-}} while (opcion !== '1' && opcion !== '2' || fs.existsSync(`./${sessions}/creds.json`))
-} 
-
-console.info = () => {} 
-console.debug = () => {} 
-
-const connectionOptions = {
-logger: pino({ level: 'silent' }),
-printQRInTerminal: opcion == '1' ? true : methodCodeQR ? true : false,
-mobile: MethodMobile, 
-browser: opcion == '1' ? Browsers.macOS("Desktop") : methodCodeQR ? Browsers.macOS("Desktop") : Browsers.macOS("Chrome"),
-auth: {
-creds: state.creds,
-keys: makeCacheableSignalKeyStore(state.keys, Pino({ level: "fatal" }).child({ level: "fatal" })),
-},
-markOnlineOnConnect: true, 
-generateHighQualityLinkPreview: true, 
-getMessage: async (clave) => {
-let jid = jidNormalizedUser(clave.remoteJid)
-let msg = await store.loadMessage(jid, clave.id)
-return msg?.message || ""
-},
-msgRetryCounterCache,
-msgRetryCounterMap,
-defaultQueryTimeoutMs: undefined,
-version,
+    if (!/^[1-2]$/.test(opcion)) {
+      console.log(chalk.bold.redBright(`✦ No se permiten numeros que no sean 1 o 2, tampoco letras o símbolos especiales.`));
+    }
+  } while ((opcion !== '1' && opcion !== '2') || fs.existsSync(`./${sessions}/creds.json`));
 }
 
+// Opciones de conexión
+const connectionOptions = {
+  logger: pino({ level: 'silent' }),
+  printQRInTerminal: opcion == '1' ? true : methodCodeQR ? true : false,
+  mobile: MethodMobile,
+  browser: opcion == '1' 
+    ? Browsers.macOS("Desktop") 
+    : methodCodeQR 
+      ? Browsers.macOS("Desktop") 
+      : Browsers.macOS("Chrome"),
+  auth: {
+    creds: state.creds,
+    keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "fatal" }).child({ level: "fatal" })),
+  },
+  markOnlineOnConnect: true,
+  generateHighQualityLinkPreview: true,
+  getMessage: async (clave) => {
+    let jid = jidNormalizedUser(clave.remoteJid);
+    let msg = await store.loadMessage(jid, clave.id);
+    return msg?.message || "";
+  },
+  msgRetryCounterCache,
+  msgRetryCounterMap,
+  defaultQueryTimeoutMs: undefined,
+  version,
+};
+
+// Crear conexión
 global.conn = makeWASocket(connectionOptions);
 
 if (!fs.existsSync(`./${sessions}/creds.json`)) {
-if (opcion === '2' || methodCode) {
-opcion = '2'
-if (!conn.authState.creds.registered) {
-let addNumber
-if (!!phoneNumber) {
-addNumber = phoneNumber.replace(/[^0-9]/g, '')
-} else {
-do {
-phoneNumber = await question(chalk.bgBlack(chalk.bold.greenBright(`✦ Por favor, Ingrese el número de WhatsApp.\n${chalk.bold.yellowBright(`✏  Ejemplo: 57321×××××××`)}\n${chalk.bold.magentaBright('---> ')}`)))
-phoneNumber = phoneNumber.replace(/\D/g,'')
-if (!phoneNumber.startsWith('+')) {
-phoneNumber = `+${phoneNumber}`
-}
-} while (!await isValidPhoneNumber(phoneNumber))
-rl.close()
-addNumber = phoneNumber.replace(/\D/g, '')
-setTimeout(async () => {
-let codeBot = await conn.requestPairingCode(addNumber)
-codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot
-console.log(chalk.bold.white(chalk.bgMagenta(`✧ CÓDIGO DE VINCULACIÓN ✧`)), chalk.bold.white(chalk.white(codeBot)))
-}, 3000)
-}}}
+  if (opcion === '2' || methodCode) {
+    opcion = '2';
+    if (!conn.authState.creds.registered) {
+      let addNumber;
+      if (!!phoneNumber) {
+        addNumber = phoneNumber.replace(/[^0-9]/g, '');
+      } else {
+        do {
+          phoneNumber = await question(
+            chalk.bgBlack(chalk.bold.greenBright(`✦ Por favor, Ingrese el número de WhatsApp.\n${chalk.bold.yellowBright(`✏  Ejemplo: 57321×××××××`)}\n${chalk.bold.magentaBright('---> ')}`))
+          );
+          phoneNumber = phoneNumber.replace(/\D/g, '');
+          if (!phoneNumber.startsWith('+')) {
+            phoneNumber = `+${phoneNumber}`;
+          }
+        } while (!await isValidPhoneNumber(phoneNumber));
+        rl.close();
+      }
+      addNumber = phoneNumber.replace(/\D/g, '');
+      setTimeout(async () => {
+        let codeBot = await conn.requestPairingCode(addNumber);
+        codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
+        console.log(chalk.bold.white(chalk.bgMagenta(`✧ CÓDIGO DE VINCULACIÓN ✧`)), chalk.bold.white(chalk.white(codeBot)));
+      }, 3000);
+    }
+  }
 }
 
 conn.isInit = false;
