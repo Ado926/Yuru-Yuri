@@ -6,13 +6,16 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   m.react('⏳')
 
   try {
-    const info = await Starlights.youtubeV2(text) // Usamos youtubeV2 para mejor soporte
+    const info = await Starlights.youtube(text) // probar youtube()
 
-    if (!info || (!info.audio || !info.video)) throw new Error('No se pudo obtener info de audio o video')
+    if (!info) throw new Error('No se pudo obtener información del video')
 
     const { title } = info
-    const audioUrl = info.audio[0]?.url || null
-    const videoUrl = info.video[0]?.url || null
+    // info puede tener audio y video en diferentes formatos, chequea las propiedades:
+    // Algunas versiones devuelven info.audio y info.video arrays, otras no
+
+    const audioUrl = info.audio?.[0]?.url || info.audio || null
+    const videoUrl = info.video?.[0]?.url || info.video || null
 
     let caption = `🎬 *${title}*\n\n🎧 Audio: ${audioUrl ? '✅' : '❌'}\n📹 Video: ${videoUrl ? '✅' : '❌'}`
     await m.reply(caption)
