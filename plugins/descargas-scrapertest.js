@@ -57,6 +57,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.help = ['ytplay <formato> <título o enlace>']
 handler.tags = ['descargas']
-handler.command = ['ytplay', 'play2']
+handler.command = ['ytstar']
 
 export default handler
