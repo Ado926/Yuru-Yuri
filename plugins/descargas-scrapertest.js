@@ -52,7 +52,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 }
 
-handler.command = /^ytx$/i
+handler.command = ['ytx']
 handler.help = ['ytx <enlace>']
 handler.tags = ['descargas']
 
