@@ -1,41 +1,44 @@
-import { ytmp3scraper } from '../lib/xdtest.js'
+import Starlights from '@StarlightsTeam/Scraper'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) {
-    return m.reply(`🚫 Ingresa un enlace de YouTube.\n📌 Ejemplo: ${usedPrefix + command} https://youtu.be/abcd1234`)
-  }
+  if (!text) return m.reply(`🚫 Ingresa un enlace de YouTube válido\nEjemplo: ${usedPrefix + command} https://youtu.be/abc123`)
 
   m.react('⏳')
 
   try {
-    const res = await ytmp3scraper(text)
-    if (!res.status) throw new Error(res.error || 'No se pudo obtener el video.')
+    const info = await Starlights.youtubeV2(text) // Usamos youtubeV2 para mejor soporte
 
-    let caption = `🎬 *${res.title}*\n\n🎧 MP3: ${res.mp3 ? '✅' : '❌'}\n📹 MP4: ${res.mp4 ? '✅' : '❌'}`
+    if (!info || (!info.audio || !info.video)) throw new Error('No se pudo obtener info de audio o video')
+
+    const { title } = info
+    const audioUrl = info.audio[0]?.url || null
+    const videoUrl = info.video[0]?.url || null
+
+    let caption = `🎬 *${title}*\n\n🎧 Audio: ${audioUrl ? '✅' : '❌'}\n📹 Video: ${videoUrl ? '✅' : '❌'}`
     await m.reply(caption)
 
-    if (res.mp3) {
+    if (audioUrl) {
       await conn.sendMessage(m.chat, {
-        audio: { url: res.mp3 },
+        audio: { url: audioUrl },
         mimetype: 'audio/mpeg',
-        fileName: `${res.title}.mp3`
+        fileName: `${title}.mp3`
       }, { quoted: m })
     }
 
-    if (res.mp4) {
+    if (videoUrl) {
       await conn.sendMessage(m.chat, {
-        video: { url: res.mp4 },
-        caption: res.title
+        video: { url: videoUrl },
+        caption: title
       }, { quoted: m })
     }
 
   } catch (e) {
     console.error(e)
-    m.reply(`❌ Error: ${e.message}`)
+    m.reply(`❌ Error al obtener el video:\n${e.message || e}`)
   }
 }
 
-handler.command = ['ytx']
-handler.help = ['ytx <enlace>']
+handler.command = ['ytstar']
+handler.help = ['ytstar <url>']
 handler.tags = ['descargas']
 export default handler
