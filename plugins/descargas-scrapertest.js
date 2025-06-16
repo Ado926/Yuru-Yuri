@@ -6,14 +6,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   m.react('⏳')
 
   try {
-    const info = await Starlights.youtube(text) // probar youtube()
+    const info = await Starlights(text) // Llamamos directo al objeto importado como función
 
     if (!info) throw new Error('No se pudo obtener información del video')
 
     const { title } = info
-    // info puede tener audio y video en diferentes formatos, chequea las propiedades:
-    // Algunas versiones devuelven info.audio y info.video arrays, otras no
-
     const audioUrl = info.audio?.[0]?.url || info.audio || null
     const videoUrl = info.video?.[0]?.url || info.video || null
 
