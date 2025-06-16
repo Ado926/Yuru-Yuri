@@ -1,12 +1,15 @@
 import { ytmp3scraper } from '../lib/xdtest.js'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`🚫 *Ingresa un enlace de YouTube válido!*\n\n📌 Uso: ${usedPrefix + command} <enlace>`)
+  if (!text) {
+    return m.reply(`🚫 *Ingresa un enlace de YouTube válido!*\n\n📌 Uso: ${usedPrefix + command} <enlace>`)
+  }
 
   m.react('🎧')
+
   try {
     const res = await ytmp3scraper(text)
-    if (!res.status) throw res.error || 'No se pudo obtener resultados.'
+    if (!res.status) throw new Error(res.error || 'No se pudo obtener resultados.')
 
     const caption = `📽️ *${res.title}*\n\n🔊 MP3: ${res.mp3 ? 'Disponible' : 'No disponible'}\n🎥 MP4: ${res.mp4 ? 'Disponible' : 'No disponible'}`
     await m.reply(caption)
