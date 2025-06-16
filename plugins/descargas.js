@@ -1,86 +1,100 @@
-import fetch from "node-fetch"
-import yts from 'yt-search'
+import fetch from "node-fetch";
+import yts from "yt-search";
+import axios from "axios";
 
-const youtubeRegexID = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/
+const youtubeRegexID = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/;
 
-const handler = async (m, { conn, text, command }) => {
+const handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     if (!text.trim()) {
-      return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o enlace del video de YouTube.`, m)
+      return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o enlace de la música.`, m);
     }
 
-    let videoIdToFind = text.match(youtubeRegexID) || null
-    let ytplay2 = await yts(videoIdToFind === null ? text : 'https://youtu.be/' + videoIdToFind[1])
+    let videoIdMatch = text.match(youtubeRegexID);
+    let search = await yts(videoIdMatch ? `https://youtu.be/${videoIdMatch[1]}` : text);
 
-    if (videoIdToFind) {
-      const videoId = videoIdToFind[1]
-      ytplay2 = ytplay2.all.find(item => item.videoId === videoId) || ytplay2.videos.find(item => item.videoId === videoId)
-    }
+    let video = videoIdMatch
+      ? search.all.find(item => item.videoId === videoIdMatch[1]) || search.videos.find(item => item.videoId === videoIdMatch[1])
+      : search.videos?.[0];
 
-    ytplay2 = ytplay2.all?.[0] || ytplay2.videos?.[0] || ytplay2
-    if (!ytplay2 || ytplay2.length === 0) {
-      return m.reply('✧ No se encontraron resultados para tu búsqueda.')
-    }
+    if (!video) return m.reply("✧ No se encontraron resultados para tu búsqueda.");
 
-    let { title, thumbnail, timestamp, views, ago, url, author } = ytplay2
+    let { title, thumbnail, timestamp, views, ago, url, author } = video;
+    title = title || "Sin título";
+    thumbnail = thumbnail || "https://telegra.ph/file/27cbe1b4f2f7ed3c1cc0a.jpg";
+    const canal = author?.name || "Desconocido";
+    const vistas = formatViews(views);
 
-    const infoMessage = `*「✦」<${title}>*\n\n` +
-                        `> ✦ *Canal:* ${author.name || 'Desconocido'}\n` +
-                        `> ✰ *Vistas:* ${formatViews(views)}\n` +
-                        `> ⴵ *Duración:* ${timestamp}\n` +
-                        `> ✐ *Publicado:* ${ago}\n` +
-                        `> 🜸 *Link:* ${url}`
+    const infoMessage = `*「✦」<${title}>*\n\n`
+      + `> ✦ *Canal* » ${canal}\n`
+      + `> ✰ *Vistas* » ${vistas}\n`
+      + `> ⴵ *Duración* » ${timestamp || "?"}\n`
+      + `> ✐ *Publicación* » ${ago || "?"}\n`
+      + `> 🜸 *Link* » ${url}`;
 
-    await conn.sendMessage(m.chat, { image: { url: thumbnail }, caption: infoMessage }, { quoted: m })
+    await conn.sendMessage(m.chat, {
+      image: { url: thumbnail },
+      caption: infoMessage
+    }, { quoted: m });
 
-    if (['play2', 'ytv', 'ytmp4', 'mp4'].includes(command)) {
+    // AUDIO
+    if (["play", "mp3", "ytmp3", "playaudio"].includes(command)) {
       try {
-        const res = await fetch(`https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`)
-        const json = await res.json()
+        const api = await (await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)).json();
+        const result = api.result?.download?.url;
 
-        if (!json.result || !json.result.url) throw new Error('No se obtuvo un enlace válido.')
+        if (!result) throw new Error("⚠ El enlace de audio no se generó correctamente.");
+        await conn.sendMessage(m.chat, {
+          audio: { url: result },
+          fileName: `${api.result.title}.mp3`,
+          mimetype: "audio/mpeg"
+        }, { quoted: m });
+      } catch (e) {
+        return conn.reply(m.chat, '⚠︎ No se pudo enviar el audio. Intenta nuevamente más tarde.', m);
+      }
+    }
+
+    // VIDEO
+    else if (["play2", "ytv", "ytmp4", "mp4"].includes(command)) {
+      try {
+        const res = await fetch(`https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`);
+        const json = await res.json();
+
+        const videoURL = json.data?.download?.url;
+        const videoTitle = json.data?.title || title;
+
+        if (!videoURL) throw new Error("⚠ No se obtuvo un enlace válido del video.");
 
         await conn.sendMessage(m.chat, {
-          video: { url: json.result.url },
-          caption: `🎬 ${json.result.title || title}`,
+          video: { url: videoURL },
+          caption: `🎬 *${videoTitle}*`,
           mimetype: 'video/mp4'
-        }, { quoted: m })
-
-      } catch (err) {
-        console.error(err)
-        return conn.reply(m.chat, '⚠︎ No se pudo enviar el video. Puede ser por peso o error del enlace.', m)
+        }, { quoted: m });
+      } catch (e) {
+        console.error('[ERROR MP4]', e);
+        return conn.reply(m.chat, '⚠︎ No se pudo enviar el video. Intenta nuevamente más tarde.', m);
       }
-    } else if (['mp3', 'ytmp3', 'play', 'playaudio'].includes(command)) {
-      try {
-        const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
-        const json = await res.json()
-        if (!json.result?.download?.url) throw new Error('No se obtuvo el enlace de audio.')
-        await conn.sendMessage(m.chat, {
-          audio: { url: json.result.download.url },
-          mimetype: 'audio/mpeg',
-          fileName: `${json.result.title}.mp3`
-        }, { quoted: m })
-      } catch (err) {
-        console.error(err)
-        return conn.reply(m.chat, '⚠︎ No se pudo enviar el audio. Puede ser por peso o error de enlace.', m)
-      }
+    } else {
+      return conn.reply(m.chat, "✧︎ Comando no reconocido.", m);
     }
+
   } catch (error) {
-    console.error(error)
-    return m.reply(`⚠︎ Ocurrió un error: ${error.message}`)
+    console.error('[ERROR GENERAL]', error);
+    return m.reply(`⚠︎ Ocurrió un error:\n${error.message || error}`);
   }
-}
+};
 
-handler.command = handler.help = ['mp3', 'ytmp3', 'playaudio', 'play2', 'ytv', 'ytmp4', 'mp4']
-handler.tags = ['descargas']
-handler.group = false
+handler.command = handler.help = ['play', 'mp3', 'ytmp3', 'playaudio', 'play2', 'ytv', 'ytmp4', 'mp4'];
+handler.tags = ['descargas'];
+handler.group = false;
 
-export default handler
+export default handler;
 
+// Función para dar formato bonito a las vistas
 function formatViews(views) {
-  if (!views) return 'No disponible'
-  if (views >= 1_000_000_000) return `${(views / 1_000_000_000).toFixed(1)}B`
-  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`
-  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}k`
-  return views.toString()
+  if (!views) return "No disponible";
+  if (views >= 1e9) return `${(views / 1e9).toFixed(1)}B (${views.toLocaleString()})`;
+  if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`;
+  if (views >= 1e3) return `${(views / 1e3).toFixed(1)}K (${views.toLocaleString()})`;
+  return views.toString();
 }
