@@ -1,100 +1,90 @@
-import fetch from "node-fetch";
-import yts from "yt-search";
-import axios from "axios";
+//CODE OFC DE YURU YURI 🤠 
+import Starlights from '@StarlightsTeam/Scraper'
+import yts from 'yt-search'
+import fetch from 'node-fetch'
 
-const youtubeRegexID = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/;
+let handler = async (m, { conn, args, usedPrefix, text, command }) => {
+  let formatos = ["mp3", "mp4", "mp3doc", "mp4doc"]
+  let [formato, ...busqueda] = text.split(" ")
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-  try {
-    if (!text.trim()) {
-      return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o enlace de la música.`, m);
-    }
-
-    let videoIdMatch = text.match(youtubeRegexID);
-    let search = await yts(videoIdMatch ? `https://youtu.be/${videoIdMatch[1]}` : text);
-
-    let video = videoIdMatch
-      ? search.all.find(item => item.videoId === videoIdMatch[1]) || search.videos.find(item => item.videoId === videoIdMatch[1])
-      : search.videos?.[0];
-
-    if (!video) return m.reply("✧ No se encontraron resultados para tu búsqueda.");
-
-    let { title, thumbnail, timestamp, views, ago, url, author } = video;
-    title = title || "Sin título";
-    thumbnail = thumbnail || "https://telegra.ph/file/27cbe1b4f2f7ed3c1cc0a.jpg";
-    const canal = author?.name || "Desconocido";
-    const vistas = formatViews(views);
-
-    const infoMessage = `*「✦」<${title}>*\n\n`
-      + `> ✦ *Canal* » ${canal}\n`
-      + `> ✰ *Vistas* » ${vistas}\n`
-      + `> ⴵ *Duración* » ${timestamp || "?"}\n`
-      + `> ✐ *Publicación* » ${ago || "?"}\n`
-      + `> 🜸 *Link* » ${url}`;
-
-    await conn.sendMessage(m.chat, {
-      image: { url: thumbnail },
-      caption: infoMessage
-    }, { quoted: m });
-
-    // AUDIO
-    if (["play", "mp3", "ytmp3", "playaudio"].includes(command)) {
-      try {
-        const api = await (await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)).json();
-        const result = api.result?.download?.url;
-
-        if (!result) throw new Error("⚠ El enlace de audio no se generó correctamente.");
-        await conn.sendMessage(m.chat, {
-          audio: { url: result },
-          fileName: `${api.result.title}.mp3`,
-          mimetype: "audio/mpeg"
-        }, { quoted: m });
-      } catch (e) {
-        return conn.reply(m.chat, '⚠︎ No se pudo enviar el audio. Intenta nuevamente más tarde.', m);
-      }
-    }
-
-    // VIDEO
-    else if (["play2", "ytv", "ytmp4", "mp4"].includes(command)) {
-      try {
-        const res = await fetch(`https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`);
-        const json = await res.json();
-
-        const videoURL = json.data?.download?.url;
-        const videoTitle = json.data?.title || title;
-
-        if (!videoURL) throw new Error("⚠ No se obtuvo un enlace válido del video.");
-
-        await conn.sendMessage(m.chat, {
-          video: { url: videoURL },
-          caption: `🎬 *${videoTitle}*`,
-          mimetype: 'video/mp4'
-        }, { quoted: m });
-      } catch (e) {
-        console.error('[ERROR MP4]', e);
-        return conn.reply(m.chat, '⚠︎ No se pudo enviar el video. Intenta nuevamente más tarde.', m);
-      }
-    } else {
-      return conn.reply(m.chat, "✧︎ Comando no reconocido.", m);
-    }
-
-  } catch (error) {
-    console.error('[ERROR GENERAL]', error);
-    return m.reply(`⚠︎ Ocurrió un error:\n${error.message || error}`);
+  if (!formatos.includes(formato)) {
+    return conn.reply(
+      m.chat,
+      `✦ *Formato inválido.*\n\n` +
+      `🧩 *Usa el comando así:*\n> *${usedPrefix + command}* mp3 Alan Walker\n\n` +
+      `🎧 *Formatos válidos:*\n` +
+      `• mp3\n• mp3doc\n• mp4\n• mp4doc`,
+      m, rcanal
+    )
   }
-};
 
-handler.command = handler.help = ['play', 'mp3', 'ytmp3', 'playaudio', 'play2', 'ytv', 'ytmp4', 'mp4'];
-handler.tags = ['descargas'];
-handler.group = false;
+  if (!busqueda.length) {
+    return conn.reply(
+      m.chat,
+      `✦ *Falta el título del video.*\n\n` +
+      `🧩 *Ejemplo:*\n> *${usedPrefix + command}* mp4 Alan Walker - Faded`,
+      m, rcanal
+    )
+  }
 
-export default handler;
+  await m.react('🕓')
 
-// Función para dar formato bonito a las vistas
-function formatViews(views) {
-  if (!views) return "No disponible";
-  if (views >= 1e9) return `${(views / 1e9).toFixed(1)}B (${views.toLocaleString()})`;
-  if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`;
-  if (views >= 1e3) return `${(views / 1e3).toFixed(1)}K (${views.toLocaleString()})`;
-  return views.toString();
+  let res = await yts(busqueda.join(" "))
+  let video = res.videos[0]
+
+  let caption = `*「✦」 » ${video.title}*\n\n`
+  caption += `> = Duración » ${video.timestamp}\n`
+  caption += `> = Visitas » ${formatNumber(video.views)}\n`
+  caption += `> = Autor » ${video.author.name}\n`
+  caption += `> = Publicado » ${eYear(video.ago)}\n`
+  caption += `> = Enlace » https://youtu.be/${video.videoId}\n\n`
+  caption += `*Enviando..*`
+
+  await conn.sendFile(m.chat, video.thumbnail, 'thumb.jpg', caption, m, rcanal)
+
+  try {
+    let data = formato.includes('mp3') ? await Starlights.ytmp3(video.url) : await Starlights.ytmp4(video.url)
+    let isDoc = formato.includes('doc')
+    let mimetype = formato.includes('mp3') ? 'audio/mpeg' : 'video/mp4'
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        [isDoc ? 'document' : formato.includes('mp3') ? 'audio' : 'video']: { url: data.dl_url },
+        mimetype,
+        fileName: `${data.title}.${formato.includes('mp3') ? 'mp3' : 'mp4'}`
+      },
+      { quoted: m }
+    )
+
+    await m.react('✅')
+  } catch (e) {
+    console.error(e)
+    await m.react('✖️')
+    conn.reply(m.chat, '✦ Ocurrió un error al descargar el archivo.', m, rcanal)
+  }
+}
+
+handler.help = ['play2 <formato> <búsqueda>']
+handler.tags = ['download']
+handler.command = ['ytplay', 'play2']
+export default handler
+
+function eYear(txt) {
+  if (!txt) return '×'
+  const replacements = [
+    ['month ago', 'mes'], ['months ago', 'meses'],
+    ['year ago', 'año'], ['years ago', 'años'],
+    ['hour ago', 'hora'], ['hours ago', 'horas'],
+    ['minute ago', 'minuto'], ['minutes ago', 'minutos'],
+    ['day ago', 'día'], ['days ago', 'días']
+  ]
+  for (const [en, es] of replacements) {
+    if (txt.includes(en)) return 'hace ' + txt.replace(en, es).trim()
+  }
+  return txt
+}
+
+function formatNumber(number) {
+  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
